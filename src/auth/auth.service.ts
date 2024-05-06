@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -32,5 +32,17 @@ export class AuthService {
 
   private async hashPassword(password: string, salt: string) {
     return bcrypt.hash(password, salt);
+  }
+
+  async singIn(authCredentialDto: AuthCredentialDto) {
+    const { username, password} = authCredentialDto;
+    const user: User = await this.userRepository.findOne({where: { username }});
+
+    if(user && await user.validatePassword(password)) {
+      return user.username;
+    }
+    else {
+      throw new UnauthorizedException('Invalid credentials');
+    }
   }
 }
