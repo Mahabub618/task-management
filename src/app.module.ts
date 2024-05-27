@@ -27,7 +27,12 @@ import { configValidationSchema } from './config.schema';
           },
           type: 'postgres',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: !isProduction,
+          migrationsRun: isProduction,
+          migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+          cli: {
+            migrationsDir: 'src/migrations',
+          },
           host: configService.get('DB_HOST'),
           port: configService.get('DB_PORT'),
           username: configService.get('DB_USERNAME'),
